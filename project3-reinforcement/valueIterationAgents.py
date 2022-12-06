@@ -66,7 +66,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         states = self.mdp.getStates()
 
         for round in range(self.iterations):
-            temp = util.Counter()
+            prevGrid = util.Counter()
             for state in states:
                 if self.mdp.isTerminal(state):
                     self.values[state] = 0
@@ -80,9 +80,9 @@ class ValueIterationAgent(ValueEstimationAgent):
                             Qvalue += tran[1]*(self.mdp.getReward(state,action,tran[0]) + self.discount*self.getValue(tran[0]))
                         Qvalues.append(Qvalue)
                     bestQ = max(Qvalues)
-                    temp[state] = bestQ
+                    prevGrid[state] = bestQ
             for state in states:
-                self.values[state] = temp[state]
+                self.values[state] = prevGrid[state]
 
 
 
@@ -173,6 +173,35 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
 
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
+        states = self.mdp.getStates()
+
+        for round in range(self.iterations):
+            state = states[round%len(states)]
+            if self.mdp.isTerminal(state):
+                self.values[state] = 0
+            else:
+                actions = self.mdp.getPossibleActions(state)
+                if len(actions) == 0:
+                    continue
+                Qvalues = []
+                for action in actions:
+                    trans = self.mdp.getTransitionStatesAndProbs(state, action)
+                    Qvalue = 0
+                    for tran in trans:
+                        Qvalue += tran[1]*(self.mdp.getReward(state,action,tran[0]) + self.discount*self.getValue(tran[0]))
+                    Qvalues.append(Qvalue)
+                bestQ = max(Qvalues)
+                self.values[state] = bestQ
+            
+
+
+
+
+
+
+
+
+
 
 class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
     """
