@@ -63,6 +63,29 @@ class ValueIterationAgent(ValueEstimationAgent):
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
 
+        states = self.mdp.getStates()
+
+        for round in range(self.iterations):
+            temp = util.Counter()
+            for state in states:
+                if self.mdp.isTerminal(state):
+                    self.values[state] = 0
+                else:
+                    actions = self.mdp.getPossibleActions(state)
+                    Qvalues = []
+                    for action in actions:
+                        trans = self.mdp.getTransitionStatesAndProbs(state, action)
+                        Qvalue = 0
+                        for tran in trans:
+                            Qvalue += tran[1]*(self.mdp.getReward(state,action,tran[0]) + self.discount*self.getValue(tran[0]))
+                        Qvalues.append(Qvalue)
+                    bestQ = max(Qvalues)
+                    temp[state] = bestQ
+            for state in states:
+                self.values[state] = temp[state]
+
+
+
 
     def getValue(self, state):
         """
@@ -77,7 +100,11 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        trans = self.mdp.getTransitionStatesAndProbs(state, action)
+        Qvalue = 0
+        for tran in trans:
+            Qvalue += tran[1]*(self.mdp.getReward(state,action,tran[0]) + self.discount*self.getValue(tran[0]))
+        return Qvalue
 
     def computeActionFromValues(self, state):
         """
@@ -89,7 +116,18 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        if self.mdp.isTerminal(state):
+            return None
+
+        actions = self.mdp.getPossibleActions(state)
+        Qvalues=[]
+        for action in actions:
+            Qvalue = self.computeQValueFromValues(state,action)
+            Qvalues.append((Qvalue,action))
+        bestAction = max(Qvalues,key = lambda i:i[0])[1]
+
+        return bestAction
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
@@ -100,6 +138,11 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     def getQValue(self, state, action):
         return self.computeQValueFromValues(state, action)
+
+
+
+
+
 
 class AsynchronousValueIterationAgent(ValueIterationAgent):
     """
