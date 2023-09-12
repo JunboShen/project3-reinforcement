@@ -1,4 +1,4 @@
-# WashU CSE517A Intro. to AI
+# WashU CSE412A Intro. to AI
 
 reinforcement learning project
 
